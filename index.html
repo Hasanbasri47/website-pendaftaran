@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulir Pendaftaran Siswa Baru</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link rel="icon" href="logo.png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
+    .preview-img {
+      max-height: 100px;
+      margin-top: 4px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input {
+      @apply border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm;
+    }
+
+    .form-section {
+      @apply bg-white rounded-xl p-6 mb-6 shadow-md;
+    }
+
+    label {
+      @apply font-medium text-sm text-gray-700;
+    }
+
+    .upload-wrapper {
+      @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+    }
+
+    .upload-item {
+      @apply flex flex-col;
+    }
+
+    .upload-item label {
+      @apply mb-1 font-semibold text-gray-700;
+    }
+
+    .upload-item input[type="file"] {
+      @apply file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 w-full;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .upload-wrapper {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    body {
+      background-color: #f7f9fc;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-section {
+      background: #ffffff;
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-section h2 {
+      color: #1e40af;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin: 12px 0 6px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      transition: 0.3s ease;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    input[readonly] {
+      outline: none;
+      border-color: #2563eb;
+      background-color: #fff;
+      cursor: not-allowed;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      transition: 0.3s ease;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    select:disabled,
+    input:disabled {
+      outline: none;
+      border-color: #2563eb;
+      background-color: #fff;
+      cursor: not-allowed;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      transition: 0.3s ease;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 10px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-top: 4px;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="bg-white shadow-lg rounded-2xl px-6 py-8 mb-6 text-center">
+      <img src="logo.png" alt="Logo Sekolah" class="mx-auto mb-4 h-20">
+      <h1 class="text-3xl font-bold text-blue-600">Formulir Pendaftaran Siswa Baru</h1>
+      <p class="text-gray-500 mt-2 text-sm">Tahun Ajaran <span id="tahunAjaran"></span></p>
+    </div>
+    <form id="formPendaftaran" action="simpan.php" method="POST" enctype="multipart/form-data" class="space-y-6">
+      <!-- 1. Data Siswa -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">1. Data Siswa</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Nama Lengkap</label>
+            <input name="nama_lengkap" type="text" placeholder="Nama Lengkap" required class="input" />
+          </div>
+          <div>
+            <label>NIK</label>
+            <input name="nik" type="text" placeholder="Nomor Induk Kependudukan" required class="input" />
+          </div>
+          <div>
+            <label>NISN</label>
+            <input name="nisn" type="text" placeholder="NISN" required class="input" />
+          </div>
+          <div>
+            <label>Jenis Kelamin</label>
+            <select name="jenis_kelamin" required class="input">
+              <option value="">Pilih Jenis Kelamin</option>
+              <option value="Laki-Laki">Laki-Laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+          </div>
+          <div>
+            <label>Tempat & Tanggal Lahir</label>
+            <input name="ttl" type="text" placeholder="Contoh: Temanggung, 12 Mei 2010" required class="input" />
+          </div>
+          <div>
+            <label>Agama</label>
+            <select name="agama" required class="input">
+              <option value="">Pilih Agama</option>
+              <option value="Islam">Islam</option>
+              <option value="Kristen">Kristen</option>
+              <option value="Katolik">Katolik</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Buddha">Buddha</option>
+              <option value="Konghucu">Konghucu</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label>Kewarganegaraan</label>
+            <input name="kewarganegaraan" type="text" placeholder="Contoh: Indonesia" required class="input" />
+          </div>
+          <div>
+            <label>Bahasa</label>
+            <input name="bahasa" type="text" placeholder="Contoh: Indonesia" required class="input" />
+          </div>
+          <div>
+            <label>Nomor Telepon Siswa</label>
+            <input name="telepon_siswa" type="text" placeholder="08xxxxxxxxxx" class="input" />
+          </div>
+          <div>
+            <label>Pilihan Jurusan</label>
+            <select name="jurusan" required class="input">
+              <option value="">Pilih Jurusan</option>
+              <option value="IPA">IPA</option>
+              <option value="IPS">IPS</option>
+              <option value="Bahasa">Bahasa</option>
+              <option value="Teknik">Teknik</option>
+              <option value="Seni">Seni</option>
+            </select>
+          </div>
+
+          <!-- Lokasi -->
+          <div>
+            <label>Provinsi</label>
+            <select id="provinsi" name="provinsi" class="input">
+              <option value="">Pilih Provinsi</option>
+            </select>
+          </div>
+          <div>
+            <label>Kabupaten/Kota</label>
+            <select id="kabupaten" name="kabupaten" class="input" disabled>
+              <option value="">Pilih Kabupaten</option>
+            </select>
+          </div>
+          <div>
+            <label>Kecamatan</label>
+            <select id="kecamatan" name="kecamatan" class="input" disabled>
+              <option value="">Pilih Kecamatan</option>
+            </select>
+          </div>
+          <div>
+            <label>Desa/Kelurahan</label>
+            <select id="desa" name="desa" class="input" disabled>
+              <option value="">Pilih Desa</option>
+            </select>
+          </div>
+          <div>
+            <label>Jalan</label>
+            <input name="jalan_siswa" type="text" placeholder="Jalan, No.Rumah/Blok" class="input" />
+          </div>
+          <div>
+            <label>Kode Pos</label>
+            <input id="kodepos" name="kodepos" class="input" placeholder="Kode Pos otomatis" readonly />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Pendidikan Sebelumnya -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">2. Pendidikan Sebelumnya</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>NPSN</label>
+            <input name="npsn" type="text" placeholder="Nomor Pokok Sekolah Nasional" required class="input" />
+          </div>
+          <div>
+            <label>Nama Sekolah</label>
+            <input name="nama_sekolah" type="text" placeholder="Nama Sekolah Asal" required class="input" />
+          </div>
+          <div>
+            <label>NIS (Jika Ada)</label>
+            <input name="nis_sekolah" type="text" placeholder="Nomor Induk/NIS" class="input" />
+          </div>
+          <div>
+            <label>Tahun Lulus/Pindah</label>
+            <input name="tahun_lulus" type="text" placeholder="Tahun Lulus/Pindah" required class="input" />
+          </div>
+          <div>
+            <label>Nilai Rata-rata Raport</label>
+            <input name="nilai_rata2" type="text" placeholder="Contoh: 85.3" class="input" />
+          </div>
+          <div>
+            <label>Alasan Pindah (jika pindahan)</label>
+            <input name="alasan_pindah" type="text" placeholder="Alasan Pindah" class="input" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">3. Ekstrakurikuler</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Pilih Ekstrakurikuler 1</label>
+            <select name="ekstrakurikuler1" required class="input">
+              <option value="">Pilih Ekstrakulikuler</option>
+              <option value="Palang Merah Remaja">Palang Merah Remaja</option>
+              <option value="Paskibraka">Paskibraka</option>
+              <option value="Pramuka">Pramuka</option>
+              <option value="Jurnalistik">Jurnalistik</option>
+              <option value="Drum Band">Drum Band</option>
+            </select>
+          </div>
+          <div>
+            <label>Pilih Ekstrakurikuler 2 (opsional) </label>
+            <select name="ekstrakurikuler2" class="input">
+              <option value="">Pilih Ekstrakulikuler</option>
+              <option value="Palang Merah Remaja">Palang Merah Remaja</option>
+              <option value="Paskibraka">Paskibraka</option>
+              <option value="Pramuka">Pramuka</option>
+              <option value="Jurnalistik">Jurnalistik</option>
+              <option value="Drum Band">Drum Band</option>
+            </select>
+          </div>
+          <div>
+            <label>Alasan 1</label>
+            <input name="alasan1" type="text" placeholder="Alasan Pemilihan Ekstrakulikuler 1" required class="input" />
+          </div>
+          <div>
+            <label>Alasan 2 (opsional)</label>
+            <input name="alasan2" type="text" placeholder="Alasan Pemilihan Ekstrakulikuler 2" class="input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Data Orang Tua/Wali -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">3. Data Orang Tua/Wali</h2>
+
+        <!-- Grid Ayah dan Ibu -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <!-- Data Ayah -->
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-gray-800">Data Ayah</h3>
+            <div class="space-y-4">
+              <div>
+                <label>Nama Ayah</label>
+                <input name="nama_ayah" type="text" placeholder="Nama Ayah" required class="input" />
+              </div>
+              <div>
+                <label>Tempat, Tanggal Lahir</label>
+                <input name="ttl_ayah" type="text" placeholder="Tempat, Tanggal Lahir Ayah" required class="input" />
+              </div>
+              <div>
+                <label>Pendidikan Terakhir</label>
+                <select name="pendidikan_ayah" required class="input">
+                  <option value="">Pilih Pendidikan Terakhir</option>
+                  <option value="Tidak Sekolah">Tidak Sekolah</option>
+                  <option value="Putus SD">Putus SD</option>
+                  <option value="SD/MI">SD/MI</option>
+                  <option value="SMP/MTs">SMP/MTs</option>
+                  <option value="SMA/MA/SMK">SMA/MA/SMK</option>
+                  <option value="D1">Diploma I (D1)</option>
+                  <option value="D2">Diploma II (D2)</option>
+                  <option value="D3">Diploma III (D3)</option>
+                  <option value="S1">Strata 1 (S1)</option>
+                  <option value="S2">Strata 2 (S2)</option>
+                  <option value="S3">Strata 3 (S3)</option>
+                </select>
+              </div>
+              <div>
+                <label>Pekerjaan</label>
+                <select name="pekerjaan_ayah" required class="input">
+                  <option value="">Pilih Pekerjaan</option>
+                  <option value="Tidak Bekerja">Tidak Bekerja</option>
+                  <option value="Petani">Petani</option>
+                  <option value="Buruh">Buruh</option>
+                  <option value="Karyawan Swasta">Karyawan Swasta</option>
+                  <option value="PNS/TNI/Polri">PNS/TNI/Polri</option>
+                  <option value="Wiraswasta">Wiraswasta</option>
+                  <option value="Pedagang">Pedagang</option>
+                  <option value="Nelayan">Nelayan</option>
+                  <option value="Guru/Dosen">Guru/Dosen</option>
+                  <option value="Dokter/Bidan/Perawat">Dokter/Bidan/Perawat</option>
+                </select>
+              </div>
+              <div>
+                <label>Alamat</label>
+                <input name="alamat_ayah" type="text" placeholder="Alamat Ayah" class="input" />
+              </div>
+              <div>
+                <label>No. HP Ayah</label>
+                <input name="hp_ayah" type="text" placeholder="08xxxx" required class="input" />
+              </div>
+              <div>
+                <label>Penghasilan</label>
+                <select name="penghasilan_ayah" class="input">
+                  <option value="">Pilih Rentang Penghasilan Ayah</option>
+                  <option value="< Rp 500.000">&lt; Rp 500.000</option>
+                  <option value="Rp 500.000 - Rp 999.999">Rp 500.000 - Rp 999.999</option>
+                  <option value="Rp 1.000.000 - Rp 1.999.999">Rp 1.000.000 - Rp 1.999.999</option>
+                  <option value="Rp 2.000.000 - Rp 4.999.999">Rp 2.000.000 - Rp 4.999.999</option>
+                  <option value="Rp 5.000.000 - Rp 9.999.999">Rp 5.000.000 - Rp 9.999.999</option>
+                  <option value="> Rp 10.000.000">&gt; Rp 10.000.000</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Ibu -->
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-gray-800">Data Ibu</h3>
+            <div class="space-y-4">
+              <div>
+                <label>Nama Ibu</label>
+                <input name="nama_ibu" type="text" placeholder="Nama Ibu" required class="input" />
+              </div>
+              <div>
+                <label>Tempat, Tanggal Lahir</label>
+                <input name="ttl_ibu" type="text" placeholder="Tempat, Tanggal Lahir Ibu" required class="input" />
+              </div>
+              <div>
+                <label>Pendidikan Terakhir</label>
+                <select name="pendidikan_ibu" required class="input">
+                  <option value="">Pilih Pendidikan Terakhir</option>
+                  <option value="Tidak Sekolah">Tidak Sekolah</option>
+                  <option value="Putus SD">Putus SD</option>
+                  <option value="SD/MI">SD/MI</option>
+                  <option value="SMP/MTs">SMP/MTs</option>
+                  <option value="SMA/MA/SMK">SMA/MA/SMK</option>
+                  <option value="D1">Diploma I (D1)</option>
+                  <option value="D2">Diploma II (D2)</option>
+                  <option value="D3">Diploma III (D3)</option>
+                  <option value="S1">Strata 1 (S1)</option>
+                  <option value="S2">Strata 2 (S2)</option>
+                  <option value="S3">Strata 3 (S3)</option>
+                </select>
+              </div>
+              <div>
+                <label>Pekerjaan</label>
+                <select name="pekerjaan_ibu" required class="input">
+                  <option value="">Pilih Pekerjaan</option>
+                  <option value="Tidak Bekerja">Tidak Bekerja</option>
+                  <option value="Petani">Petani</option>
+                  <option value="Buruh">Buruh</option>
+                  <option value="Karyawan Swasta">Karyawan Swasta</option>
+                  <option value="PNS/TNI/Polri">PNS/TNI/Polri</option>
+                  <option value="Wiraswasta">Wiraswasta</option>
+                  <option value="Pedagang">Pedagang</option>
+                  <option value="Nelayan">Nelayan</option>
+                  <option value="Guru/Dosen">Guru/Dosen</option>
+                  <option value="Dokter/Bidan/Perawat">Dokter/Bidan/Perawat</option>
+                </select>
+              </div>
+              <div>
+                <label>Alamat</label>
+                <input name="alamat_ibu" type="text" placeholder="Alamat Ayah" class="input" />
+              </div>
+              <div>
+                <label>No. HP Ibu</label>
+                <input name="hp_ibu" type="text" placeholder="08xxxx" required class="input" />
+              </div>
+              <div>
+                <label>Penghasilan</label>
+                <select name="penghasilan_ibu" required class="input">
+                  <option value="">Pilih Rentang Penghasilan Ibu</option>
+                  <option value="< Rp 500.000">&lt; Rp 500.000</option>
+                  <option value="Rp 500.000 - Rp 999.999">Rp 500.000 - Rp 999.999</option>
+                  <option value="Rp 1.000.000 - Rp 1.999.999">Rp 1.000.000 - Rp 1.999.999</option>
+                  <option value="Rp 2.000.000 - Rp 4.999.999">Rp 2.000.000 - Rp 4.999.999</option>
+                  <option value="Rp 5.000.000 - Rp 9.999.999">Rp 5.000.000 - Rp 9.999.999</option>
+                  <option value="> Rp 10.000.000">&gt; Rp 10.000.000</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Wali -->
+        <div class="mt-10">
+          <h3 class="text-lg font-semibold mb-2 text-gray-800">Data Wali (Jika Ada)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label>Nama Wali</label>
+              <input name="nama_wali" type="text" placeholder="Nama Wali" class="input" />
+            </div>
+            <div>
+              <label>Hubungan dengan Siswa</label>
+              <select name="hubungan_wali" class="input">
+                <option value="">Pilih Hubungan</option>
+                <option value="Paman">Paman</option>
+                <option value="Bibi">Bibi</option>
+                <option value="Kakek">Kakek</option>
+                <option value="Nenek">Nenek</option>
+                <option value="Wali Asuh">Wali Asuh</option>
+              </select>
+            </div>
+            <div>
+              <label>Alamat Wali</label>
+              <input name="alamat_wali" type="text" placeholder="Alamat Wali" class="input" />
+            </div>
+            <div>
+              <label>Pendidikan Terakhir</label>
+              <select name="pendidikan_wali" class="input">
+                <option value="">Pilih Pendidikan Terakhir</option>
+                <option value="Tidak Sekolah">Tidak Sekolah</option>
+                <option value="Putus SD">Putus SD</option>
+                <option value="SD/MI">SD/MI</option>
+                <option value="SMP/MTs">SMP/MTs</option>
+                <option value="SMA/MA/SMK">SMA/MA/SMK</option>
+                <option value="D1">Diploma I (D1)</option>
+                <option value="D2">Diploma II (D2)</option>
+                <option value="D3">Diploma III (D3)</option>
+                <option value="S1">Strata 1 (S1)</option>
+                <option value="S2">Strata 2 (S2)</option>
+                <option value="S3">Strata 3 (S3)</option>
+              </select>
+            </div>
+            <div>
+              <label>Pekerjaan</label>
+              <select name="pekerjaan_wali" class="input">
+                <option value="">Pilih Pekerjaan</option>
+                <option value="Tidak Bekerja">Tidak Bekerja</option>
+                <option value="Petani">Petani</option>
+                <option value="Buruh">Buruh</option>
+                <option value="Karyawan Swasta">Karyawan Swasta</option>
+                <option value="PNS/TNI/Polri">PNS/TNI/Polri</option>
+                <option value="Wiraswasta">Wiraswasta</option>
+                <option value="Pedagang">Pedagang</option>
+                <option value="Nelayan">Nelayan</option>
+                <option value="Guru/Dosen">Guru/Dosen</option>
+                <option value="Dokter/Bidan/Perawat">Dokter/Bidan/Perawat</option>
+              </select>
+            </div>
+            <div>
+              <label>Penghasilan Wali per Bulan</label>
+              <select name="penghasilan_wali" class="input">
+                <option value="">Pilih Rentang Penghasilan</option>
+                <option value="< Rp 500.000">&lt; Rp 500.000</option>
+                <option value="Rp 500.000 - Rp 999.999">Rp 500.000 - Rp 999.999</option>
+                <option value="Rp 1.000.000 - Rp 1.999.999">Rp 1.000.000 - Rp 1.999.999</option>
+                <option value="Rp 2.000.000 - Rp 4.999.999">Rp 2.000.000 - Rp 4.999.999</option>
+                <option value="Rp 5.000.000 - Rp 9.999.999">Rp 5.000.000 - Rp 9.999.999</option>
+                <option value="> Rp 10.000.000">&gt; Rp 10.000.000</option>
+              </select>
+            </div>
+            <div>
+              <label>No. HP Wali</label>
+              <input name="hp_wali" type="text" placeholder="08xxxx" class="input" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 4. Data Kesehatan -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">4. Data Kesehatan</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Golongan Darah</label>
+            <select name="gol_darah" class="input">
+              <option value="">Pilih Golongan Darah</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="AB">AB</option>
+              <option value="O">O</option>
+              <option value="Tidak Tahu">Tidak Tahu</option>
+            </select>
+          </div>
+          <div>
+            <label>Riwayat Penyakit</label>
+            <input name="riwayat_penyakit" type="text" placeholder="Contoh: Asma, Alergi" class="input" />
+          </div>
+          <div>
+            <label>Tinggi & Berat Badan</label>
+            <input name="tinggi_berat" type="text" placeholder="Contoh: 160cm / 50kg" class="input" />
+          </div>
+          <div>
+            <label>Catatan Kesehatan Khusus</label>
+            <input name="catatan_kesehatan" type="text" placeholder="Contoh: Tidak boleh makan kacang" class="input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Upload Dokumen -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">5. Upload Dokumen</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-1">Akta Kelahiran</label>
+            <input type="file" name="akta" required class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Kartu Keluarga</label>
+            <input type="file" name="kk" required class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">KTP Orang Tua</label>
+            <input type="file" name="ktp" required class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Kartu Indonesia Pintar (opsional)</label>
+            <input type="file" name="kip" class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Kartu Indonesia Sehat (opsional)</label>
+            <input type="file" name="kis" class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Foto 3x4</label>
+            <input type="file" name="foto" required class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Ijazah / Surat Pindah</label>
+            <input type="file" name="ijazah" class="input" />
+          </div>
+          <div>
+            <label class="block mb-1">Legalisir Ijazah</label>
+            <input type="file" name="legalisir_ijazah" class="input" />
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 6. Pernyataan & Persetujuan -->
+      <div class="form-section">
+        <h2 class="text-xl font-semibold mb-4 text-blue-600">6. Pernyataan & Persetujuan</h2>
+        <div class="space-y-4">
+          <label class="flex items-start gap-2">
+            <input type="checkbox" name="pernyataan" required class="mt-1" />
+            <span class="text-sm text-gray-700">Saya menyatakan bahwa semua data yang saya isi adalah benar dan dapat
+              dipertanggungjawabkan.</span>
+          </label>
+          <label class="flex items-start gap-2">
+            <input type="checkbox" name="persetujuan" required class="mt-1" />
+            <span class="text-sm text-gray-700">Saya menyetujui untuk mengikuti seluruh peraturan dan tata tertib yang
+              berlaku di sekolah.</span>
+          </label>
+          <div class="form-field">
+            <label>Tanggal Pengisian Formulir</label>
+            <input type="text" class="form-control" id="tanggalPengisian" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol -->
+      <div class="flex flex-col md:flex-row justify-between gap-4">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow">Kirim</button>
+        <button type="button" onclick="cetakPDF()"
+          class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow">Cetak
+          PDF</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Isi otomatis tahun ajaran
+    const now = new Date();
+    const tahun = now.getFullYear();
+    document.getElementById("tahunAjaran").textContent = `${tahun}/${tahun + 1}`;
+  </script>
+
+  <canvas id="barcodeCanvas" class="hidden" width="200" height="50"></canvas>
+  <div id="pdfPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-4 w-full max-w-4xl max-h-[90vh] overflow-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold">Preview Formulir PDF</h2>
+        <button onclick="tutupPreview()" class="text-red-500 hover:underline">Tutup</button>
+      </div>
+      <iframe id="pdfIframe" class="w-full h-[70vh] border"></iframe>
+      <button onclick="downloadPDF()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download
+        PDF</button>
+    </div>
+  </div>
+
+  <!-- Script Auto Alamat Lokal dari JSON bersarang -->
+  <script>
+    let wilayahData = {};
+
+    async function initWilayah() {
+      const res = await fetch('wilayah.json');
+      wilayahData = await res.json();
+
+      const provinsiSelect = document.getElementById("provinsi");
+      const kabupatenSelect = document.getElementById("kabupaten");
+      const kecamatanSelect = document.getElementById("kecamatan");
+      const desaSelect = document.getElementById("desa");
+      const kodePosInput = document.getElementById("kodepos");
+
+      Object.keys(wilayahData).forEach(prov => {
+        provinsiSelect.add(new Option(prov, prov));
+      });
+
+      provinsiSelect.addEventListener("change", () => {
+        kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten</option>';
+        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        kodePosInput.value = "";
+        kabupatenSelect.disabled = false;
+
+        const kabupatenData = wilayahData[provinsiSelect.value]["Kabupaten/Kota"];
+        Object.keys(kabupatenData).forEach(kab => {
+          kabupatenSelect.add(new Option(kab, kab));
+        });
+      });
+
+      kabupatenSelect.addEventListener("change", () => {
+        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        kodePosInput.value = "";
+        kecamatanSelect.disabled = false;
+
+        const kecData = wilayahData[provinsiSelect.value]["Kabupaten/Kota"][kabupatenSelect.value]["Kecamatan"];
+        Object.keys(kecData).forEach(kec => {
+          kecamatanSelect.add(new Option(kec, kec));
+        });
+      });
+
+      kecamatanSelect.addEventListener("change", () => {
+        desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+        kodePosInput.value = "";
+        desaSelect.disabled = false;
+
+        const desaData = wilayahData[provinsiSelect.value]["Kabupaten/Kota"][kabupatenSelect.value]["Kecamatan"][kecamatanSelect.value]["Kelurahan/Desa"];
+        Object.keys(desaData).forEach(desa => {
+          desaSelect.add(new Option(desa, desa));
+        });
+      });
+
+      desaSelect.addEventListener("change", () => {
+        const kodePos = wilayahData[provinsiSelect.value]["Kabupaten/Kota"][kabupatenSelect.value]["Kecamatan"][kecamatanSelect.value]["Kelurahan/Desa"][desaSelect.value]["Kode Pos"];
+        kodePosInput.value = kodePos || "";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", initWilayah);
+  </script>
+
+  <script>
+    function cekHalaman(doc, y, baris = 1, tinggiBaris = 6, marginBawah = 10) {
+      const tinggiHalaman = doc.internal.pageSize.getHeight();
+      if (y + (baris * tinggiBaris) + marginBawah > tinggiHalaman) {
+        doc.addPage();
+        return 10;
+      }
+      return y;
+    }
+    function formatTanggalIndonesiaLengkap(date) {
+      const bulanIndo = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+      ];
+      const tgl = date.getDate();
+      const bln = bulanIndo[date.getMonth()];
+      const thn = date.getFullYear();
+      return `${tgl} ${bln} ${thn}`;
+    }
+
+    async function cetakPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+
+      const form = document.getElementById('formPendaftaran');
+      const data = new FormData(form);
+      const tahun = new Date().getFullYear();
+      const tahunAjaran = `${tahun}/${tahun + 1}`;
+
+      const loadLogo = () => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = 'logo.png';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+      });
+
+      try {
+        const logo = await loadLogo();
+        doc.addImage(logo, 'PNG', 15, 10, 20, 20);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text("PEMERINTAH KOTA PERCOBAAN", 105, 15, null, null, "center");
+        doc.text("UPT PENDIDIKAN PERCOBAAN", 105, 21, null, null, "center");
+        doc.text("SEKOLAH MENENGAH ATAS NEGERI 1 PERCOBAAN", 105, 27, null, null, "center");
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text("Jl. Percobaan No. 100, Kolor, Kec. Percobaan, Kab. Percobaan, Percobaan 12345", 105, 32, null, null, "center");
+        doc.line(10, 34, 200, 34);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text("FORMULIR PENDAFTARAN SISWA BARU", 105, 42, null, null, "center");
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`TAHUN PELAJARAN ${tahunAjaran}`, 105, 48, null, null, "center");
+
+        const fotoFile = data.get("foto");
+        if (fotoFile && fotoFile.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = async function (e) {
+            const imgData = e.target.result;
+            doc.addImage(imgData, "JPEG", 15, 55, 30, 40);
+            await generateBarcodeAndLanjut(doc, data);
+          };
+          reader.readAsDataURL(fotoFile);
+        } else {
+          await generateBarcodeAndLanjut(doc, data);
+        }
+
+      } catch (err) {
+        console.error("Gagal memuat logo atau data:", err);
+        alert("Gagal memuat logo atau data.");
+      }
+    }
+
+    async function generateBarcodeAndLanjut(doc, data) {
+      const nama = data.get("nama_lengkap") || "-";
+      const nisn = data.get("nisn") || "-";
+      const nik = data.get("nik") || "-"; // pastikan ini 'nik' bukan 'kewarganegaraan'
+      const barcodeValue = `Nama: ${nama} | NISN: ${nisn} | NIK: ${nik}`;
+
+      try {
+        const canvas = document.getElementById("barcodeCanvas");
+
+        // Cek jika canvas ditemukan
+        if (!canvas) {
+          throw new Error("Canvas barcode tidak ditemukan.");
+        }
+
+        // Clear canvas sebelum menggambar
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        JsBarcode(canvas, barcodeValue, {
+          format: "CODE128",
+          width: 1.5,
+          height: 40,
+          displayValue: false,
+          margin: 0
+        });
+
+        const barcodeDataURL = canvas.toDataURL("image/png");
+        doc.addImage(barcodeDataURL, 'PNG', 150, 55, 45, 20);
+        doc.setFontSize(8);
+        doc.text(`ID: ${nisn}`, 150, 78);
+
+        lanjutkanIsiFormulir(doc, data);
+      } catch (error) {
+        console.error("Gagal generate barcode:", error);
+        alert("Gagal membuat barcode. " + error.message);
+      }
+    }
+
+    function lanjutkanIsiFormulir(doc, data) {
+      const margin = 10;
+      let y = margin + 90;
+      const labelX = margin;
+      const titikDuaX = 75;
+      const isiX = 80;
+      const maxWidth = 200 - isiX - margin;
+
+      const printField = (label, key) => {
+        const val = data.get(key) || '-';
+        const lines = doc.splitTextToSize(val.toString(), maxWidth);
+        y = cekHalaman(doc, y, lines.length);
+        doc.setFont(undefined, 'normal');
+        doc.text(label, labelX, y);
+        doc.text(":", titikDuaX, y);
+        doc.text(lines, isiX, y);
+        y += (lines.length * 6);
+      };
+
+      const alamatLengkap = [
+        data.get("jalan"), data.get("desa"),
+        data.get("kecamatan") ? "Kec. " + data.get("kecamatan") : null,
+        data.get("kabupaten") ? "Kab. " + data.get("kabupaten") : null,
+        data.get("provinsi") ? "Prov. " + data.get("provinsi") : null,
+        data.get("kodepos")
+      ].filter(Boolean).join(", ");
+
+      doc.setFont(undefined, 'bold');
+      y = cekHalaman(doc, y);
+      doc.text("A. Biodata Anak", labelX, y);
+      y += 6;
+      printField("1. Nama Calon Siswa", "nama_lengkap");
+      printField("2. Tempat/Tanggal Lahir", "ttl");
+      printField("3. Jenis Kelamin", "jenis_kelamin");
+      printField("3. Agama", "agama");
+      printField("3. Kewarganegaraan", "kewarganegaraan");
+      printField("3. Bahasa", "bahasa");
+      const alamatLines = doc.splitTextToSize(alamatLengkap || "-", maxWidth);
+      y = cekHalaman(doc, y, alamatLines.length);
+      doc.text("4. Alamat", labelX, y);
+      doc.text(":", titikDuaX, y);
+      doc.text(alamatLines, isiX, y);
+      y += (alamatLines.length * 6);
+      printField("5. No. HP", "telepon_siswa");
+      printField("6. Jurusan Dipilih", "jurusan");
+
+      doc.setFont(undefined, 'bold');
+      y = cekHalaman(doc, y);
+      doc.text("B. Data Orang Tua /Wali Murid", labelX, y);
+      y += 6;
+
+      // Posisi kolom kiri (Ayah) dan kanan (Ibu)
+      const kolomKiriX = labelX;
+      const kolomKananX = 105;
+      const isiXKiri = kolomKiriX + 40;
+      const isiXKanan = kolomKananX + 40;
+      const titikDuaXKiri = kolomKiriX + 35;
+      const titikDuaXKanan = kolomKananX + 35;
+
+      // Fungsi untuk mencetak teks pendek
+      const printKolom = (label, value, xLabel, xTitikDua, xIsi, yBaris) => {
+        doc.setFont(undefined, 'normal');
+        doc.text(label, xLabel, yBaris);
+        doc.text(":", xTitikDua, yBaris);
+        doc.text(value || "-", xIsi, yBaris);
+      };
+
+      // Fungsi untuk mencetak teks panjang (multiline)
+      const printKolomMultiline = (label, value, xLabel, xTitikDua, xIsi, yBaris, maxWidth = 55) => {
+        doc.setFont(undefined, 'normal');
+        doc.text(label, xLabel, yBaris);
+        doc.text(":", xTitikDua, yBaris);
+        const lines = doc.splitTextToSize(value || "-", maxWidth);
+        doc.text(lines, xIsi, yBaris);
+        return lines.length * 3.5;
+      };
+
+      // Daftar data Ayah dan Ibu
+      const barisOrtu = [
+        ["1. Nama Ayah", "nama_ayah", "1. Nama Ibu", "nama_ibu"],
+        ["2. Tempat, Tanggal Lahir", "ttl_ayah", "2. Tempat, Tanggal Lahir", "ttl_ibu"],
+        ["3. Alamat", "alamat_ayah", "3. Alamat", "alamat_ibu"],
+        ["4. Pendidikan Terakhir", "pendidikan_ayah", "4. Pendidikan Terakhir", "pendidikan_ibu"],
+        ["5. Pekerjaan", "pekerjaan_ayah", "5. Pekerjaan", "pekerjaan_ibu"], // multiline
+        ["6. No. Handphone", "hp_ayah", "6. No. Handphone", "hp_ibu"],
+        ["7. Penghasilan", "penghasilan_ayah", "7. Penghasilan", "penghasilan_ibu"],
+      ];
+
+      // Cetak 2 kolom sejajar
+      barisOrtu.forEach(([labelA, keyA, labelI, keyI]) => {
+        const valA = data.get(keyA) || "-";
+        const valI = data.get(keyI) || "-";
+        y = cekHalaman(doc, y);
+        const tinggiA = (keyA.includes("alamat"))
+          ? printKolomMultiline(labelA, valA, kolomKiriX, titikDuaXKiri, isiXKiri, y)
+          : (printKolom(labelA, valA, kolomKiriX, titikDuaXKiri, isiXKiri, y), 6);
+        const tinggiI = (keyI.includes("alamat"))
+          ? printKolomMultiline(labelI, valI, kolomKananX, titikDuaXKanan, isiXKanan, y)
+          : (printKolom(labelI, valI, kolomKananX, titikDuaXKanan, isiXKanan, y), 6);
+        y += Math.max(tinggiA, tinggiI); // pastikan ambil baris tertinggi
+      });
+
+      // Spasi sebelum wali
+
+      // === Data Wali (bawah kolom kiri)
+      doc.setFont(undefined, 'bold');
+      doc.text("Data Wali (Opsional)", kolomKiriX, y);
+      y += 6;
+
+      // Daftar data wali
+      const waliData = [
+        ["1. Nama Wali", "nama_wali"],
+        ["2. Hubungan", "hubungan_wali"],
+        ["3. Alamat", "alamat_wali"], // multiline
+        ["4. Pendidikan Terakhir", "pendidikan_wali"],
+        ["5. Pekerjaan", "pekerjaan_wali"],
+        ["6. Penghasilan", "penghasilan_wali"],
+        ["7. No. Handphone", "hp_wali"],
+      ];
+
+      // Cetak data wali
+      waliData.forEach(([label, key]) => {
+        const val = data.get(key) || "-";
+        y = cekHalaman(doc, y);
+        const tinggi = (key.includes("alamat"))
+          ? printKolomMultiline(label, val, kolomKiriX, titikDuaXKiri, isiXKiri, y)
+          : (printKolom(label, val, kolomKiriX, titikDuaXKiri, isiXKiri, y), 6);
+        y += tinggi;
+      });
+      // === Data Ekstrakurikuler ===
+      doc.setFont(undefined, 'bold');
+      y = cekHalaman(doc, y);
+      doc.text("C. Data Ekstrakurikuler", labelX, y);
+      doc.setFont(undefined, 'normal');
+      y += 6;
+      printField("1. Ekstrakurikuler 1", "ekstrakurikuler1");
+      printField("2. Alasan 1", "alasan1");
+      printField("3. Ekstrakurikuler 2", "ekstrakurikuler2");
+      printField("4. Alasan 2", "alasan2");
+
+      // === Data Kesehatan ===
+      doc.setFont(undefined, 'bold');
+      y = cekHalaman(doc, y);
+      doc.text("D. Data Kesehatan", labelX, y);
+      doc.setFont(undefined, 'normal');
+      y += 6;
+      printField("1. Golongan Darah", "gol_darah");
+      printField("2. Riwayat Penyakit", "riwayat_penyakit");
+      printField("3. Tinggi & Berat Badan", "tinggi_berat");
+      printField("4. Catatan Khusus", "catatan_kesehatan");
+
+      // === Penyesuaian Huruf Subbab Berikutnya ===
+      doc.setFont(undefined, 'bold');
+      y = cekHalaman(doc, y);
+      doc.text("C. Persyaratan yang diserahkan", labelX, y);
+      doc.setFont(undefined, 'normal');
+      y += 6;
+      const dokumenFields = [
+        ["1. Scan Ijazah/Surat Pindah", "ijazah"],
+        ["1. Scan Legalisir Ijazah", "legalisir_ijazah"],
+        ["2. Scan Akta Kelahiran", "akta"],
+        ["3. Scan Kartu Keluarga", "kk"],
+        ["4. Scan KTP Orangtua", "ktp"],
+        ["4. Pas Foto 3x4", "foto"],
+        ["5. Scan Kartu Indonesia Pintar (opsional)", "kip"],
+        ["5. Scan Kartu Indonesia Sehat (opsional)", "kis"]
+      ];
+      dokumenFields.forEach(([label, name]) => {
+        const file = data.get(name);
+        const status = file && file.name ? "Sudah diupload" : "Kosong";
+        y = cekHalaman(doc, y);
+        doc.text(label, labelX, y);
+        doc.text(":", titikDuaX, y);
+        doc.text(status, isiX, y);
+        y += 6;
+      });
+
+      y += 10;
+      y = cekHalaman(doc, y);
+      doc.setFont(undefined, 'normal');
+      doc.text("Data yang tercantum dalam formulir ini disampaikan dengan sebenar-benarnya untuk digunakan sebagaimana mestinya.", labelX, y);
+
+      // Tanda tangan kiri & kanan
+      // Tambahkan sedikit spasi sebelum tanda tangan
+      y += 10;
+      y = cekHalaman(doc, y);
+
+      // Set font normal (tidak bold)
+      doc.setFont(undefined, 'normal');
+
+      // Ambil tanggal
+      const now = new Date();
+      const tanggalStr = `Sumenep, ${formatTanggalIndonesiaLengkap(now)}`;
+      doc.text(tanggalStr, 180, y, null, null, "right");
+
+      // Tulisan "Orang Tua/Wali Murid"
+      y += 6;
+      y = cekHalaman(doc, y);
+      doc.text("Orang Tua/Wali Murid", 30, y);
+
+      // ====== Calon Siswa + Tanda Tangan Siswa ======
+
+      const namaSiswa = data.get("nama_lengkap") || "Nama Siswa";
+      const namaStr = `${namaSiswa}`;
+      const namaWidth = doc.getTextWidth(namaStr);
+
+      // Tentukan posisi kanan maksimal (misal 180), geser ke kiri agar nama muat
+      const xMaxKanan = 180;
+      const namaX = xMaxKanan - namaWidth;
+
+      // Letakkan "Calon Siswa" di tengah terhadap namaSiswa
+      const calonSiswaX = namaX + namaWidth / 2;
+      doc.text("Calon Siswa", calonSiswaX, y, null, null, "center");
+
+      // ====== Tanda Tangan ======
+      y += 20;
+      y = cekHalaman(doc, y);
+
+      // Orang Tua
+      const ortuStr = "                                ";
+      const ortuWidth = doc.getTextWidth(ortuStr);
+      doc.text(ortuStr, 30, y);
+      doc.line(30, y + 2, 30 + ortuWidth, y + 2);
+
+      // Siswa
+      doc.text(namaStr, namaX, y);
+      doc.line(namaX, y + 2, namaX + namaWidth, y + 2); // garis bawah sesuai panjang nama
+
+      // ====== Petugas ======
+      y += 20;
+      y = cekHalaman(doc, y);
+      doc.text("Petugas", 105, y, null, null, "center");
+
+      // Garis tanda tangan
+      y += 20;
+      y = cekHalaman(doc, y);
+      const petugasStr = "                                ";
+      const petugasWidth = doc.getTextWidth(petugasStr);
+      const petugasX = 105 - petugasWidth / 2;
+      doc.text(petugasStr, petugasX, y);
+      doc.line(petugasX, y + 2, petugasX + petugasWidth, y + 2);
+
+      // NIP ditambahkan di bawah garis
+      y += 6; // sedikit jarak ke bawah dari garis
+      y = cekHalaman(doc, y);
+      doc.text("NIP.                        ", 105, y, null, null, "center");
+
+      tampilkanPreview(doc);
+    }
+
+    function tampilkanPreview(doc) {
+      const pdfBlob = doc.output("blob");
+      latestPDFBlob = pdfBlob;
+      const url = URL.createObjectURL(pdfBlob);
+      document.getElementById("pdfIframe").src = url;
+      document.getElementById("pdfPreviewModal").classList.remove("hidden");
+    }
+
+    function tutupPreview() {
+      document.getElementById("pdfPreviewModal").classList.add("hidden");
+      document.getElementById("pdfIframe").src = "";
+      if (latestPDFBlob) URL.revokeObjectURL(latestPDFBlob);
+    }
+
+    function downloadPDF() {
+      if (latestPDFBlob) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(latestPDFBlob);
+        link.download = "formulir_pendaftaran.pdf";
+        link.click();
+      }
+    }
+  </script>
+  <!-- Script Kirim ke Backend -->
+  <script>
+    document.getElementById('formPendaftaran').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      const formData = new FormData(form);
+
+      const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      const maxSizeMB = 2;
+
+      // Ambil semua input type file
+      const fileInputs = form.querySelectorAll('input[type="file"]');
+
+      for (const input of fileInputs) {
+        const file = input.files[0];
+        if (file) {
+          const fileType = file.type;
+          const fileSizeMB = file.size / 1024 / 1024;
+
+          if (!validTypes.includes(fileType)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Format tidak didukung',
+              text: `File "${input.name}" harus berformat JPG, PNG, atau PDF.`,
+            });
+            return;
+          }
+
+          if (fileSizeMB > maxSizeMB) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Ukuran file terlalu besar',
+              text: `File "${input.name}" melebihi batas ${maxSizeMB} MB.`,
+            });
+            return;
+          }
+        }
+      }
+
+      // Jika semua file valid, kirim form
+      fetch('simpan.php', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.text())
+        .then(response => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Formulir berhasil dikirim.',
+            showConfirmButton: true,
+          });
+          form.reset();
+        })
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Terjadi kesalahan saat mengirim data.',
+          });
+        });
+    });
+  </script>
+  <script>
+    // Isi otomatis tanggal hari ini ke input readonly
+    const today = new Date().toISOString().split("T")[0];
+    const tanggal = new Date().toLocaleDateString('id-ID');
+    document.getElementById("tanggalPengisian").value = tanggal;
+  </script>
+</body>
+
+</html>
